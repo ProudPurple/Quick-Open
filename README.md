@@ -1,1 +1,1 @@
-A quick little quick open application I made to streamline opening vs code cause i hated having to use their console
+A quick little quick open application I made to streamline opening vs code cause i hated having to use their consoleA quick little quick open application I made to streamline opening vs code cause i hated having to use their console
