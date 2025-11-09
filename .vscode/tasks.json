@@ -1,0 +1,24 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build quickOpen",
+            "type": "shell",
+            "command": "cl",
+            "args": [
+                "/EHsc",
+                "quickOpen.cpp",
+                "resources.res",
+                "/Fe:quickOpen.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": ["$msCompile"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

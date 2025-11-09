@@ -44,6 +44,7 @@ int main() {
             return 1;
         }
     } else if (whatpart == "code") {
+        fullCmd = "cmd.exe /c call \"" + vcvars64 + "\" && start /B \"\" code \"" + projectDir + "\" && exit";
         std::vector<char> cmdLine(fullCmd.begin(), fullCmd.end());
         cmdLine.push_back('\0');
 
@@ -61,9 +62,3 @@ int main() {
     } else return 0;
     return 0;
 }
-
-
-
-
-//cd C:\Users\ander\OneDrive\Desktop\Work\Coding\Actually Useful\Console Shorties
-//cl /EHsc quickOpen.cpp resources.res
