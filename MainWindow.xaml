@@ -1,0 +1,248 @@
+<Window x:Class="ProjectHub.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:ProjectHub"
+        Title="Project Hub" Height="720" Width="1100"
+        MinHeight="420" MinWidth="650"
+        Background="#0D0618"
+        FontFamily="Segoe UI"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <!-- Rounded button base -->
+        <Style x:Key="RoundBtn" TargetType="Button">
+            <Setter Property="Foreground" Value="#E9D5FF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="11,5"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.82"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.62"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.38"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Small X remove button -->
+        <Style x:Key="RemoveBtn" TargetType="Button">
+            <Setter Property="Foreground" Value="#5C4A7C"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#3D1060"/>
+                                <Setter Property="Foreground" Value="#C084FC"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Project card template -->
+        <DataTemplate x:Key="CardTemplate">
+            <Border Width="420" Margin="12" CornerRadius="12"
+                    BorderThickness="1" Cursor="Arrow">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="#1C1030"/>
+                        <Setter Property="BorderBrush" Value="#3D2060"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#271540"/>
+                                <Setter Property="BorderBrush" Value="#6B21A8"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+
+                <Grid>
+                    <Grid Margin="24,20">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Project name -->
+                        <TextBlock Grid.Row="0"
+                                   Text="{Binding Name}"
+                                   Foreground="#E9D5FF" FontSize="20" FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis" Margin="0,0,30,0"/>
+
+                        <!-- Parent folder -->
+                        <TextBlock Grid.Row="1"
+                                   Text="{Binding RelativePath}"
+                                   Foreground="#5C4A7C" FontSize="13" Margin="0,5,0,0"
+                                   TextTrimming="CharacterEllipsis"/>
+
+                        <!-- Last commit badge -->
+                        <Border Grid.Row="2" Margin="0,14,0,0" HorizontalAlignment="Left"
+                                Background="#2E1A4A" CornerRadius="5" Padding="12,6">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#x25CF; " Foreground="#C084FC" FontSize="13"/>
+                                <TextBlock Text="{Binding LastCommit}" Foreground="#C084FC" FontSize="13"
+                                           MaxWidth="310" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Buttons -->
+                        <StackPanel Grid.Row="4" Orientation="Horizontal">
+                            <Button Content="Code" Background="#6B21A8"
+                                    Style="{StaticResource RoundBtn}"
+                                    Tag="{Binding FolderPath}" Click="OpenVSCode_Click"
+                                    FontSize="13" Padding="16,7"
+                                    Margin="0,0,8,0"/>
+                            <Button Content="Folder" Background="#3D2060"
+                                    Style="{StaticResource RoundBtn}"
+                                    Tag="{Binding FolderPath}" Click="OpenFolder_Click"
+                                    FontSize="13" Padding="16,7"
+                                    Margin="0,0,8,0"/>
+                            <Button Content="GitHub" Background="#2A1845"
+                                    Style="{StaticResource RoundBtn}"
+                                    Tag="{Binding GitHubUrl}" Click="OpenGitHub_Click"
+                                    FontSize="13" Padding="16,7"
+                                    Visibility="{Binding HasGitHub, Converter={StaticResource BoolToVis}}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Remove button (top-right overlay) -->
+                    <Button HorizontalAlignment="Right" VerticalAlignment="Top"
+                            Margin="0,8,8,0"
+                            Content="&#x2715;"
+                            Style="{StaticResource RemoveBtn}"
+                            Tag="{Binding FolderPath}" Click="RemoveProject_Click"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="58"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ── Header ── -->
+        <Border Grid.Row="0" Background="#180D2A" BorderBrush="#6B21A8" BorderThickness="0,0,0,2">
+            <Grid Margin="20,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="PROJECT HUB"
+                           Foreground="#9333EA" FontSize="18" FontWeight="Bold"
+                           VerticalAlignment="Center"/>
+
+                <!-- Search box -->
+                <TextBox Grid.Column="2" x:Name="SearchBox"
+                         Width="220" VerticalAlignment="Center" Margin="0,0,12,0"
+                         Background="#2A1845" Foreground="#E9D5FF" CaretBrush="#E9D5FF"
+                         BorderBrush="#4C3A6A" BorderThickness="1"
+                         Padding="10,6" FontSize="13"
+                         TextChanged="SearchBox_TextChanged">
+                    <TextBox.Template>
+                        <ControlTemplate TargetType="TextBox">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="4">
+                                <ScrollViewer x:Name="PART_ContentHost"
+                                              Margin="{TemplateBinding Padding}"
+                                              VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </TextBox.Template>
+                </TextBox>
+
+                <TextBlock Grid.Column="3" x:Name="StatusText"
+                           Foreground="#5C4A7C" FontSize="12"
+                           VerticalAlignment="Center" Margin="0,0,12,0"/>
+
+                <Button Grid.Column="4" x:Name="AddBtn"
+                        Content="+ Add" ToolTip="Add repository"
+                        Height="34" FontSize="12"
+                        Background="#6B21A8" Style="{StaticResource RoundBtn}"
+                        Padding="12,0" VerticalAlignment="Center"
+                        Margin="0,0,8,0"
+                        Click="AddProject_Click"/>
+
+                <Button Grid.Column="5" x:Name="RefreshBtn"
+                        Content="&#8635;" ToolTip="Refresh"
+                        Width="34" Height="34" FontSize="17"
+                        Background="#3D2060" Style="{StaticResource RoundBtn}"
+                        Padding="0" VerticalAlignment="Center"
+                        Click="Refresh_Click"/>
+            </Grid>
+        </Border>
+
+        <!-- ── Content area ── -->
+        <Grid Grid.Row="1">
+            <!-- Loading state -->
+            <TextBlock x:Name="LoadingText"
+                       Text="Scanning for git repos..."
+                       Foreground="#5C4A7C" FontSize="14"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Visibility="Visible"/>
+
+            <!-- Empty state -->
+            <TextBlock x:Name="EmptyText"
+                       Text="No projects found."
+                       Foreground="#3D2060" FontSize="14"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Visibility="Collapsed"/>
+
+            <!-- Project cards -->
+            <ScrollViewer x:Name="ProjectsScroller"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Visibility="Collapsed">
+                <ItemsControl x:Name="ProjectsControl" Margin="8"
+                              ItemTemplate="{StaticResource CardTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>
